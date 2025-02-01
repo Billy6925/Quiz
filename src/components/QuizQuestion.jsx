@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuizContext } from '../contexts/QuizContext';
+
 const QuizQuestion = () => {
     const { questions } = useContext(QuizContext);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -86,56 +87,52 @@ const QuizQuestion = () => {
     const currentQuestion = questions[currentIndex];
 
     return (
-        <div className="max-w-2xl mx-auto p-6">
-            <div className="mb-6">
-                <div className="w-full h-3 bg-gray-200 rounded-full">
+        <div className="quiz-container">
+            <div>
+                <div style={{ background: '#f3f3f3', borderRadius: '4px' }}>
                     <div 
                         className="progress-bar" 
                         style={{ width: `${progress}%` }} 
                     />
                 </div>
-                <div className="text-center mt-2 text-gray-600">
+                <div style={{ textAlign: 'center', marginTop: '8px', color: '#666' }}>
                     Question {currentIndex + 1} of {questions.length}
                 </div>
             </div>
 
-            <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{currentQuestion.question}</h2>
+            <div>
+                <h2>{currentQuestion.question}</h2>
                 {showError && (
-                    <div className="text">
+                    <div style={{ color: 'red', marginBottom: '10px' }}>
                         Please answer the question before proceeding!
                     </div>
                 )}
-                <ul className="space-y-3">
+                <div className="quiz-options">
                     {currentQuestion.options.map((option, index) => (
-                        <li key={index}>
-                            <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="answer"
-                                    value={option}
-                                    checked={selectedAnswer === option}
-                                    onChange={() => handleAnswerSelection(option)}
-                                    className="mr-3"
-                                />
-                                <span>{option}</span>
-                            </label>
-                        </li>
+                        <label key={index}>
+                            <input
+                                type="radio"
+                                name="answer"
+                                value={option}
+                                checked={selectedAnswer === option}
+                                onChange={() => handleAnswerSelection(option)}
+                                style={{ marginRight: '10px' }}
+                            />
+                            <span>{option}</span>
+                        </label>
                     ))}
-                </ul>
+                </div>
             </div>
 
-            <div className="flex justify-between mt-6">
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <button
                     onClick={handlePrevious}
                     disabled={currentIndex === 0}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
                 >
                     Previous
                 </button>
                 <button
                     onClick={handleNext}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                 >
                     {currentIndex === questions.length - 1 ? "Finish" : "Next"}
                 </button>
