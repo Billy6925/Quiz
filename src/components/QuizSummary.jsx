@@ -11,7 +11,13 @@ function QuizSummary() {
     return (
         <div className="container">
             <h2 className="title">Quiz Summary</h2>
-            <p>No quiz history available.</p>
+            {quizHistory.length > 0 ? (
+                quizHistory.map((quiz, index) => (
+                    <QuizItem key={index} quiz={quiz} index={quizHistory.length - index} />
+                ))
+            ) : (
+                <p className="message">No quiz history available. Take a quiz to see your results here!</p>
+            )}
         </div>
     );
 }
