@@ -1,6 +1,13 @@
 import React from "react";
 
 function QuizSummary() {
+    const [quizHistory, setQuizHistory] = useState([]);
+    useEffect(() => {
+        const storedHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
+        setQuizHistory(storedHistory);
+    }, []);
+    
+
     return (
         <div className="container">
             <h2 className="title">Quiz Summary</h2>
