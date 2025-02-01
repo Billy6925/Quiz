@@ -1,59 +1,140 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function Result() {
+const Result = () => {
   const [questions, setQuestions] = useState([]);
-  const [results, setResults] = useState([]);
+  const [userAnswers, setUserAnswers] = useState([]);
   const [score, setScore] = useState(0);
+  const [percentage, setPercentage] = useState(0);
+  const [results, setResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedQuiz = JSON.parse(localStorage.getItem("lastQuizData")) || {};
-    const { questions = [], results = [] } = storedQuiz;
+    const storedAnswers = JSON.parse(localStorage.getItem("userAnswers")) || [];
+    const storedQuizData = JSON.parse(localStorage.getItem("lastQuizData")) || {};
+    
+    setUserAnswers(storedAnswers);
+    setQuestions(storedQuizData.questions || []);
+    setResults(storedQuizData.results || []);
 
-    setQuestions(questions);
-    setResults(results);
-
-    const correctCount = results.filter(r => r.isCorrect).length;
-    setScore(correctCount);
-
-    saveQuizHistory(storedQuiz);
+    if (storedQuizData.results) {
+      const correctCount = storedQuizData.results.filter(r => r.isCorrect).length;
+      const total = storedQuizData.results.length;
+      setScore(correctCount);
+      setPercentage(((correctCount / total) * 100).toFixed(2));
+    }
+    
+    completeQuiz(storedQuizData);
   }, []);
 
-  const saveQuizHistory = (quizData) => {
-    if (!quizData.results?.length) return;
-    
-    const history = JSON.parse(localStorage.getItem("quizHistory")) || [];
-    localStorage.setItem("quizHistory", JSON.stringify([quizData, ...history]));
-    localStorage.removeItem("quizState");
+  const completeQuiz = (quizData) => {
+    if (!quizData.results) return;
+
+    const newQuizData = {
+      questions: quizData.questions,
+      results: quizData.results,
+    };
+
+    const existingHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
+    existingHistory.unshift(newQuizData);
+    localStorage.setItem("quizHistory", JSON.stringify(existingHistory));
+    localStorage.removeItem('quizState');
   };
+
+  const handleTryAnother = async () => {
+    setIsLoading(true);
+    try {
+      localStorage.removeItem("userAnswers");
+      localStorage.removeItem("lastQuizData");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate("/categories");
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleRestartQuiz = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      localStorage.removeItem("userAnswers");
+      localStorage.removeItem("lastQuizData");
+      setScore(0);
+      setPercentage(0);
+      navigate("/quiz");
+    }, 1000);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="result-container">
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #3498db',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            animation: 'spin 1s linear infinite',
+            margin: '20px auto'
+          }}></div>
+          <div>Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="result-container">
-      <h2 className="score-heading">Final Score: {score} / {questions.length}</h2>
-      <h3 className="percentage-heading">Percentage: {((score / (results.length || 1)) * 100).toFixed(2)}%</h3>
-
-      <ul className="results-list">
-        {results.map((res, i) => (
-          <li key={i} className="result-item">
-            <strong>Q{i + 1}: </strong>{res.question}
-            <br />
-            <strong>Your Answer: </strong>
-            <span className={res.isCorrect ? "correct-answer" : "incorrect-answer"}>
-              {res.userAnswer} {res.isCorrect ? "✓" : "✗"}
-            </span>
-            {!res.isCorrect && <><br /><strong>Correct Answer: </strong>{res.correctAnswer}</>}
-          </li>
+      <div className="quiz-title">Quiz Results</div>
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <div className="quiz-score">Score: {score} / {questions.length}</div>
+        <div className="quiz-percentage">Percentage: {percentage}%</div>
+      </div>
+      
+      <div className="results-list">
+        {results.map((result, index) => (
+          <div key={index} className={`result-item ${result.isCorrect ? 'correct' : 'incorrect'}`}>
+            <div style={{ marginBottom: '8px' }}>Question {index + 1}:</div>
+            <div style={{ marginBottom: '8px' }}>{result.question}</div>
+            <div style={{ marginBottom: '4px' }}>
+              Your Answer: {result.userAnswer}
+              <span style={{ marginLeft: '8px' }}>{result.isCorrect ? "✓" : "✗"}</span>
+            </div>
+            {!result.isCorrect && (
+              <div>
+                Correct Answer: {result.correctAnswer}
+              </div>
+            )}
+          </div>
         ))}
-      </ul>
+      </div>
 
       <div className="button-container">
-        <Button variant="primary" onClick={() => navigate("/categories")}>Try Another Quiz</Button>
-        <Button variant="secondary" onClick={() => navigate("/summary")}>View Summary</Button>
+        <button
+          onClick={handleTryAnother}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading...' : 'Try Another Quiz'}
+        </button>
+        <button
+          onClick={handleRestartQuiz}
+          disabled={isLoading}
+          style={{ margin: '0 10px' }}
+        >
+          {isLoading ? 'Restarting...' : 'Restart Quiz'}
+        </button>
+        <button
+          onClick={() => navigate("/summary")}
+          disabled={isLoading}
+        >
+          View Summary
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default Result;

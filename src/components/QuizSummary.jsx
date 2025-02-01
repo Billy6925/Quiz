@@ -1,12 +1,19 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 
 function QuizSummary() {
     const [quizHistory, setQuizHistory] = useState([]);
+
     useEffect(() => {
         const storedHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
-        setQuizHistory(storedHistory);
+        setQuizHistory(
+            Array.isArray(storedHistory)
+                ? storedHistory.filter((quiz, index, self) =>
+                    index === self.findIndex(q => JSON.stringify(q) === JSON.stringify(quiz))
+                )
+                : []
+        );
     }, []);
-    
 
     return (
         <div className="container">
@@ -42,7 +49,6 @@ function QuizItem({ quiz, index }) {
     );
 }
 
-
 function QuizResult({ result, idx }) {
     return (
         <li className="result-item">
@@ -61,6 +67,5 @@ function QuizResult({ result, idx }) {
         </li>
     );
 }
-
 
 export default QuizSummary;
