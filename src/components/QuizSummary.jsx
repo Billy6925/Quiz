@@ -45,10 +45,22 @@ function QuizItem({ quiz, index }) {
 
 function QuizResult({ result, idx }) {
     return (
-        <div>
+        <li className="result-item">
             <strong>Question {idx + 1}: </strong>{result.question}
-        </div>
+            <br />
+            <strong>Your Answer: </strong>
+            <span className={result.isCorrect ? "correct" : "incorrect"}>
+                {result.userAnswer} {result.isCorrect ? "✓" : "✗"}
+            </span>
+            {!result.isCorrect && (
+                <>
+                    <br />
+                    <strong>Correct Answer: </strong>{result.correctAnswer}
+                </>
+            )}
+        </li>
     );
 }
+
 
 export default QuizSummary;
