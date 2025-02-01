@@ -23,13 +23,25 @@ function QuizSummary() {
 }
 
 function QuizItem({ quiz, index }) {
+    const total = quiz.results.length;
+    const score = quiz.results.filter(r => r.isCorrect).length;
+    const percentage = ((score / total) * 100).toFixed(2);
+
     return (
         <div className="quiz-card">
-            <h3>Quiz {index}</h3>
-            <p>Quiz details go here.</p>
+            <h3 className="quiz-title">Quiz {index}</h3>
+            <p className="quiz-score">Final Score: {score} / {total}</p>
+            <p className="quiz-percentage">Percentage: {percentage}%</p>
+            <h4 className="results-title">Results:</h4>
+            <ul className="results-list">
+                {quiz.results.map((result, idx) => (
+                    <QuizResult key={idx} result={result} idx={idx} />
+                ))}
+            </ul>
         </div>
     );
 }
+
 
 function QuizResult({ result, idx }) {
     return (
