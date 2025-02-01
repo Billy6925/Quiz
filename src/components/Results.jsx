@@ -1,5 +1,5 @@
-import React from "react";
 import React, { useState, useEffect } from "react";
+import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 function Result() {
@@ -11,12 +11,14 @@ function Result() {
   useEffect(() => {
     const storedQuiz = JSON.parse(localStorage.getItem("lastQuizData")) || {};
     const { questions = [], results = [] } = storedQuiz;
-  
+
     setQuestions(questions);
     setResults(results);
-  
+
     const correctCount = results.filter(r => r.isCorrect).length;
     setScore(correctCount);
+
+    saveQuizHistory(storedQuiz);
   }, []);
 
   const saveQuizHistory = (quizData) => {
@@ -26,8 +28,6 @@ function Result() {
     localStorage.setItem("quizHistory", JSON.stringify([quizData, ...history]));
     localStorage.removeItem("quizState");
   };
-  
-  
 
   return (
     <div className="result-container">
@@ -47,6 +47,7 @@ function Result() {
           </li>
         ))}
       </ul>
+
       <div className="button-container">
         <Button variant="primary" onClick={() => navigate("/categories")}>Try Another Quiz</Button>
         <Button variant="secondary" onClick={() => navigate("/summary")}>View Summary</Button>
@@ -54,6 +55,5 @@ function Result() {
     </div>
   );
 }
-
 
 export default Result;
